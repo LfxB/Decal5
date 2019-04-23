@@ -1,7 +1,7 @@
 
 # Decal5
 A Graffiti and Vehicle Vinyl script mod for GTA V.
-> [Release page](https://www.gta5-mods.com/scripts/decal5](https://www.gta5-mods.com/scripts/decal5)
+> [Release page](https://www.gta5-mods.com/scripts/decal5)
 
 # Building Requirements
 Clone the following repositories to the same parent folder as this repo:
