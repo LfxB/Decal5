@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{752D621C-C129-494C-B92D-C0BF3A570035}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GraffitiArtist_TextureVersion</RootNamespace>
+    <AssemblyName>GraffitiArtist</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ScriptHookVDotNet2">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\Rockstar Games\Grand Theft Auto V\ScriptHookVDotNet2.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\ScriptCommunicatorMenu\Example\ScriptCommunicatorHelper.cs">
+      <Link>ScriptCommunicatorHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\SimpleUI\SimpleUI\SimpleUI.cs">
+      <Link>SimpleUI.cs</Link>
+    </Compile>
+    <Compile Include="EnumExtensions.cs" />
+    <Compile Include="ExistingGraffiti.cs" />
+    <Compile Include="GraffitiArtInfo.cs" />
+    <Compile Include="GraffitiInfo.cs" />
+    <Compile Include="GTAVFunctions.cs" />
+    <Compile Include="MainScript.cs" />
+    <Compile Include="MathUtil.cs" />
+    <Compile Include="ModSettings\GraffitiScriptSettings.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DecalUtils.cs" />
+    <Compile Include="ModSettings\SerializedProperty.cs" />
+    <Compile Include="ModSettings\Settings.cs" />
+    <Compile Include="StringExtensions.cs" />
+    <Compile Include="XMLHelper.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <!-- Replace this path with your own directory -->
+    <PostBuildEvent>COPY "$(TargetDir)$(TargetFileName)" "C:\Program Files\Rockstar Games\Grand Theft Auto V\scripts"
+COPY "$(TargetDir)$(TargetName).pdb" "C:\Program Files\Rockstar Games\Grand Theft Auto V\scripts"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

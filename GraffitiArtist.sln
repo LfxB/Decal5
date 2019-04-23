@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraffitiArtist_TextureVersion", "source\GraffitiArtist_TextureVersion\GraffitiArtist_TextureVersion.csproj", "{752D621C-C129-494C-B92D-C0BF3A570035}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddonGraffitiListMaker", "source\AddonGraffitiListMaker\AddonGraffitiListMaker.csproj", "{9064B04E-CAAE-40D3-9209-C5D29D00F929}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{752D621C-C129-494C-B92D-C0BF3A570035}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{752D621C-C129-494C-B92D-C0BF3A570035}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{752D621C-C129-494C-B92D-C0BF3A570035}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{752D621C-C129-494C-B92D-C0BF3A570035}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9064B04E-CAAE-40D3-9209-C5D29D00F929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9064B04E-CAAE-40D3-9209-C5D29D00F929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9064B04E-CAAE-40D3-9209-C5D29D00F929}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9064B04E-CAAE-40D3-9209-C5D29D00F929}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {684DDADC-F70A-41DB-B78E-CFF89DA5E597}
+	EndGlobalSection
+EndGlobal
