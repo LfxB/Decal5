@@ -138,7 +138,7 @@ namespace GraffitiArtist
 
         public static void AddTextureToDecalType(int decalType, string textureDict, string textureName)
         {
-            Function.Call(Hash._0x8A35C742130C6080, decalType, textureDict, textureName);
+            Function.Call(Hash._OVERRIDE_DECAL_TEXTURE, decalType, textureDict, textureName);
         }
 
         private static Vector3 DecalRotationInput(Vector3 direction, float rotationAngle, Entity onEntity = null)

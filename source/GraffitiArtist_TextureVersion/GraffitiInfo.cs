@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using GTA;
 using GTA.Math;
+using GTA.UI;
 using GTAMath;
 using ModSettings;
 
@@ -498,7 +499,7 @@ namespace GraffitiArtist
             //SaveAllVehicleGraffitiToFile();
             SaveSingleVehicleOutfit(savedOutfit);
 
-            UI.ShowSubtitle("Outfit saved: " + CurrentEditOutfit.OutfitName, 8000);
+            Screen.ShowSubtitle("Outfit saved: " + CurrentEditOutfit.OutfitName, 8000);
         }
 
         #endregion
@@ -507,7 +508,7 @@ namespace GraffitiArtist
         {
             if (UsableDecalTypes.Any(d => d.Available)) //((LastHitDecalTypeIndex != -1 && UsableDecalTypes[LastHitDecalTypeIndex].Available) || NextAvailableDecalType(out LastHitDecalTypeIndex))
             {
-                RaycastResult ray = World.Raycast(GameplayCamera.Position, GameplayCamera.Position + GameplayCamera.Direction * 2000, IntersectOptions.Map | IntersectOptions.Mission_Entities | IntersectOptions.Objects, Game.Player.Character);
+                RaycastResult ray = World.Raycast(GameplayCamera.Position, GameplayCamera.Position + GameplayCamera.Direction * 2000, IntersectFlags.Map | IntersectFlags.MissionEntities | IntersectFlags.Objects, Game.Player.Character);
 
                 //int handle = TextureClasses.AddDecalTexture(ray.HitCoords, -ray.SurfaceNormal, new Vector3(unkX, unkY, unkZ).Normalized, "graffiti", "black_angel_wings", TextureClasses.DecalTypes.solidPool_oil, 3.84f, 3.555f, 255f, 255f, 255f, 255f, 0.5f);
 
@@ -517,12 +518,12 @@ namespace GraffitiArtist
                 
                 Vector2 grafSize = ResizedWidthHeightBasedOnNewWidth(LastSelectedGraffiti.TextureWidth, LastSelectedGraffiti.TextureHeight, 2f, WidthHeightSizeCoeff);
 
-                LastHitLocation = ray.HitCoords;
+                LastHitLocation = ray.HitPosition;
                 LastHitDirection = -ray.SurfaceNormal;
                 LastHitRotationAngle = RotationAngle;
                 LastHitGrafSize = grafSize;
 
-                if (ray.DitHitEntity && GTAVFunctions.GTAFunction.EntityIsAVehicle(ray.HitEntity))
+                if (ray.HitEntity != null && GTAVFunctions.GTAFunction.EntityIsAVehicle(ray.HitEntity))
                 {
                     LastHitVehicle = (Vehicle)ray.HitEntity;
                 }
@@ -531,7 +532,7 @@ namespace GraffitiArtist
                     LastHitVehicle = null;
                 }
 
-                int handle = DecalHelper.AddDecalTexture(ray.HitCoords, -ray.SurfaceNormal, RotationAngle, LastSelectedGraffiti.TextureDictionary, LastSelectedGraffiti.TextureName, 9007, grafSize.X, grafSize.Y, 255f, 255f, 255f, 255f, 0.5f, true, LastHitVehicle);
+                int handle = DecalHelper.AddDecalTexture(ray.HitPosition, -ray.SurfaceNormal, RotationAngle, LastSelectedGraffiti.TextureDictionary, LastSelectedGraffiti.TextureName, 9007, grafSize.X, grafSize.Y, 255f, 255f, 255f, 255f, 0.5f, true, LastHitVehicle);
 
                 /*UI.ShowSubtitle(
                     "Angle: " + RotationAngle
@@ -541,7 +542,7 @@ namespace GraffitiArtist
             }
             else
             {
-                UI.ShowSubtitle("Too many decals nearby!\nYou cannot place anymore here.", 1);
+                Screen.ShowSubtitle("Too many decals nearby!\nYou cannot place anymore here.", 1);
                 return false;
             }
         }

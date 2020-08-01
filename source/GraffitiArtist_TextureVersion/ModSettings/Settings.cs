@@ -63,11 +63,11 @@ namespace ModSettings
                     object value;
                     if (property.PropertyType.IsEnum)
                     {
-                        value = Convert.ChangeType(settings.GetValue(section, key), TypeCode.Int32);
+                        value = Convert.ChangeType(settings.GetValue(section, key, 0), TypeCode.Int32);
                     }
                     else
                     {
-                        value = Convert.ChangeType(settings.GetValue(section, key), pType);
+                        value = Convert.ChangeType(settings.GetValue(section, key, 0), pType);
                     }
                     property.SetValue(this, value);
                 }
@@ -266,7 +266,7 @@ namespace ModSettings
                             if (selectedItem != item)
                                 return;
 
-                            var input = Game.GetUserInput(property.GetValue(this).ToString(), 999);
+                            var input = Game.GetUserInput(property.GetValue(this).ToString());
                             if (string.IsNullOrEmpty(input)) return;
 
                             int res;
@@ -297,7 +297,7 @@ namespace ModSettings
                             if (selectedItem != item)
                                 return;
 
-                            var input = Game.GetUserInput(property.GetValue(this).ToString(), 999);
+                            var input = Game.GetUserInput(property.GetValue(this).ToString());
                             if (string.IsNullOrEmpty(input)) return;
 
                             float res;
@@ -316,7 +316,7 @@ namespace ModSettings
                             if (selectedItem != item)
                                 return;
 
-                            var input = Game.GetUserInput(property.GetValue(this).ToString(), 999);
+                            var input = Game.GetUserInput(property.GetValue(this).ToString());
                             if (string.IsNullOrEmpty(input)) return;
 
                             property.SetValue(this, input);
@@ -409,13 +409,13 @@ namespace ModSettings
                 if (item == resetButton)
                 {
                     Read();
-                    UI.Notify("Changes reset!"
+                    GTA.UI.Notification.Show("Changes reset!"
                         + "\nChanges are not shown until you edit the items.");
                 }
 
                 if (item != saveButton) return;
                 Write();
-                UI.Notify("Settings saved!");
+                GTA.UI.Notification.Show("Settings saved!");
             };
 
             return subMenu;
