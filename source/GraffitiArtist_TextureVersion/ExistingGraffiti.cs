@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using GTA;
 using GTA.Math;
+using GTA.UI;
 using GTAMath;
 
 namespace GraffitiArtist
@@ -210,17 +211,21 @@ namespace GraffitiArtist
                 }
             }
             else
-            {
-                UI.ShowSubtitle("There are too many decals in this area!\nSome will not display.", 1);
+            { 
+                Screen.ShowSubtitle("There are too many decals in this area!\nSome will not display.", 1);
             }
         }
 
         public override void ShowInfo3D()
         {
-            UIText info = new UIText("DecalType: " + (DecalTypeIndexIsValid() ? GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].DecalTypeID.ToString() : "None")
-                + "\nCount: " + GraffitiOG.LoadedCount
+            TextElement info = new TextElement(
+                "DecalType: " + (DecalTypeIndexIsValid()
+                                  ? GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].DecalTypeID.ToString()
+                                  : "None")
+                              + "\nCount: " + GraffitiOG.LoadedCount
                 /*"\nAvailable: " + GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].Available*/,
-                UI.WorldToScreen(Location), 0.40f, System.Drawing.Color.White, Font.ChaletComprimeCologne, true);
+                Screen.WorldToScreen(Location), 0.40f, System.Drawing.Color.White, Font.ChaletComprimeCologne,
+                Alignment.Center);
             info.Enabled = true;
             info.Draw();
         }
@@ -278,7 +283,7 @@ namespace GraffitiArtist
 
             if (TaggedVehicle == null || !TaggedVehicle.Exists()) return;
 
-            Direction = (TaggedVehicle.GetOffsetInWorldCoords(Location) - TaggedVehicle.GetOffsetInWorldCoords(Location_ForDirectionPurpose)).Normalized;
+            Direction = (TaggedVehicle.GetOffsetPosition(Location) - TaggedVehicle.GetOffsetPosition(Location_ForDirectionPurpose)).Normalized;
 
             if (IsWithinViewingRange())
             {
@@ -341,7 +346,10 @@ namespace GraffitiArtist
                 if (!DecalTypeIndexIsValid()) return;
 
                 GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].Available = false;
-                Handle = DecalHelper.AddDecalTexture(TaggedVehicle.GetOffsetInWorldCoords(Location), Direction, RotationAngle, GraffitiOG.TextureDictionary, GraffitiOG.TextureName, GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].DecalTypeID, DisplayWidth, DisplayHeight, RGB_Red, RGB_Green, RGB_Blue, RGB_Alpha, timeInSeconds, true, TaggedVehicle);
+                Handle = DecalHelper.AddDecalTexture(TaggedVehicle.GetOffsetPosition(Location), Direction,
+                    RotationAngle, GraffitiOG.TextureDictionary, GraffitiOG.TextureName,
+                    GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].DecalTypeID, DisplayWidth,
+                    DisplayHeight, RGB_Red, RGB_Green, RGB_Blue, RGB_Alpha, timeInSeconds, true, TaggedVehicle);
 
                 if (MirrorFlip != GraffitiMethods.MirrorFlip.None)
                 {
@@ -356,7 +364,7 @@ namespace GraffitiArtist
             }
             else
             {
-                UI.ShowSubtitle("There are too many decals in this area!\nSome will not display.", 1);
+                Screen.ShowSubtitle("There are too many decals in this area!\nSome will not display.", 1);
             }
         }
 
@@ -364,7 +372,7 @@ namespace GraffitiArtist
         {
             Vector3 pos = new Vector3(Location.X * -1f, Location.Y, Location.Z);
             Vector3 pos2 = new Vector3(Location_ForDirectionPurpose.X * -1f, Location_ForDirectionPurpose.Y, Location_ForDirectionPurpose.Z);
-            mirroredDir = (TaggedVehicle.GetOffsetInWorldCoords(pos) - TaggedVehicle.GetOffsetInWorldCoords(pos2)).Normalized;
+            mirroredDir = (TaggedVehicle.GetOffsetPosition(pos) - TaggedVehicle.GetOffsetPosition(pos2)).Normalized;
             return pos;
         }
 
@@ -390,7 +398,10 @@ namespace GraffitiArtist
             }
 
             Vector3 pos = GetMirroredPos(out dir);
-            MirroredHandle = DecalHelper.AddDecalTexture(TaggedVehicle.GetOffsetInWorldCoords(pos), dir, rotAngle, GraffitiOG.TextureDictionary, GraffitiOG.TextureName, GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].DecalTypeID, DisplayWidth, DisplayHeight, RGB_Red, RGB_Green, RGB_Blue, RGB_Alpha, timeInSeconds, true, TaggedVehicle);
+            MirroredHandle = DecalHelper.AddDecalTexture(TaggedVehicle.GetOffsetPosition(pos), dir, rotAngle,
+                GraffitiOG.TextureDictionary, GraffitiOG.TextureName,
+                GraffitiMethods.UsableDecalTypes[GraffitiOG.DecalTypeIndex].DecalTypeID, DisplayWidth, DisplayHeight,
+                RGB_Red, RGB_Green, RGB_Blue, RGB_Alpha, timeInSeconds, true, TaggedVehicle);
         }
 
         public void DeleteMirroredDecal()
@@ -399,13 +410,13 @@ namespace GraffitiArtist
 
             Vector3 temp;
             if (TaggedVehicle != null && TaggedVehicle.Exists())
-                DecalHelper.RemoveDecalsInRange(TaggedVehicle.GetOffsetInWorldCoords(GetMirroredPos(out temp)), 0.0000000000001f);
+                DecalHelper.RemoveDecalsInRange(TaggedVehicle.GetOffsetPosition(GetMirroredPos(out temp)), 0.0000000000001f);
         }
 
         protected override bool IsWithinViewingRange()
         {
             float x, y;
-            Vector3 worldCoord = TaggedVehicle.GetOffsetInWorldCoords(Location);
+            Vector3 worldCoord = TaggedVehicle.GetOffsetPosition(Location);
             return World.GetDistance(Game.Player.Character.Position, worldCoord) <= GraffitiMethods.MyScriptSettings.MinimumLoadingRange || (GTAVFunctions.GTAFunction.GetScreenCoordFromWorldCoord(worldCoord, out x, out y) && World.GetDistance(Game.Player.Character.Position, worldCoord) <= GraffitiMethods.MyScriptSettings.MaximumLoadingRange);
         }
 
@@ -430,16 +441,18 @@ namespace GraffitiArtist
             DeleteMirroredDecal();
 
             if (TaggedVehicle != null && TaggedVehicle.Exists())
-                DecalHelper.RemoveDecalsInRange(TaggedVehicle.GetOffsetInWorldCoords(Location), 0.0000000000001f);
+                DecalHelper.RemoveDecalsInRange(TaggedVehicle.GetOffsetPosition(Location), 0.0000000000001f);
         }
         
         public override void ShowInfo3D()
         {
-            UIText info = new UIText(Graffiti.TextureName 
-                /*+ "\nDecalType: " + GraffitiMethods.UsableDecalTypes[AvailableDecalTypeIndex].DecalTypeID 
-                + "\nAvailable: " + GraffitiMethods.UsableDecalTypes[AvailableDecalTypeIndex].Available */
-                + "\n" + GTAVFunctions.GTAFunction.RoundVector3D(this.Location, 3), 
-                UI.WorldToScreen(TaggedVehicle.GetOffsetInWorldCoords(Location)), 0.40f, System.Drawing.Color.FromArgb(180, System.Drawing.Color.White), Font.ChaletComprimeCologne, true);
+            TextElement info = new TextElement(Graffiti.TextureName
+                                               /*+ "\nDecalType: " + GraffitiMethods.UsableDecalTypes[AvailableDecalTypeIndex].DecalTypeID 
+                                               + "\nAvailable: " + GraffitiMethods.UsableDecalTypes[AvailableDecalTypeIndex].Available */
+                                               + "\n" + GTAVFunctions.GTAFunction.RoundVector3D(this.Location, 3),
+                Screen.WorldToScreen(TaggedVehicle.GetOffsetPosition(Location)), 0.40f,
+                System.Drawing.Color.FromArgb(180, System.Drawing.Color.White), Font.ChaletComprimeCologne,
+                Alignment.Center);
             info.Enabled = true;
             info.Draw();
         }
@@ -489,7 +502,7 @@ namespace GraffitiArtist
         public void SetVehicleInfo(Vehicle vehicle)
         {
             VehicleModelHash = vehicle.Model.Hash;
-            FriendlyName = vehicle.FriendlyName;
+            FriendlyName = vehicle.LocalizedName;
             DisplayName = vehicle.DisplayName;
         }
 
@@ -506,7 +519,13 @@ namespace GraffitiArtist
         {
             if (CurrentVehicle == null || !CurrentVehicle.Exists()) return;
 
-            UIText info = new UIText("Outfit Name: " + OutfitName + "\nVehicle Name: " + (FriendlyName == null || FriendlyName == "NULL" ? DisplayName : FriendlyName), UI.WorldToScreen(CurrentVehicle.Position), 0.40f, System.Drawing.Color.FromArgb(180, System.Drawing.Color.Red), Font.ChaletComprimeCologne, true);
+            TextElement info = new TextElement("Outfit Name: " + OutfitName +
+                                               "\nVehicle Name: " + (FriendlyName == null || FriendlyName == "NULL"
+                                                   ? DisplayName
+                                                   : FriendlyName),
+                Screen.WorldToScreen(CurrentVehicle.Position), 0.40f,
+                System.Drawing.Color.FromArgb(180, System.Drawing.Color.Red), Font.ChaletComprimeCologne,
+                Alignment.Center);
             info.Enabled = true;
             info.Draw();
         }

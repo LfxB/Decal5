@@ -576,7 +576,7 @@ namespace GTAMath
 		public static Vector3 DirectionToRotation(Vector3 dir, float roll)
 		{
 			dir = Vector3.Normalize(dir);
-			Vector3 rotval;
+			Vector3 rotval = new Vector3();
 			rotval.Z = -MathUtil.RadiansToDegrees((float)Math.Atan2(dir.X, dir.Y));
 			Vector3 rotpos = Vector3.Normalize(new Vector3(dir.Z, new Vector3(dir.X, dir.Y, 0.0f).Length(), 0.0f));
 			rotval.X = MathUtil.RadiansToDegrees((float)Math.Atan2(rotpos.X, rotpos.Y));

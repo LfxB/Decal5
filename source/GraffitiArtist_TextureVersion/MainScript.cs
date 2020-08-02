@@ -6,6 +6,7 @@ using System.Windows.Forms; // This is a reference that is needed! do not edit t
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using GTA.UI;
 using GTAMath;
 using SimpleUI;
 using ScriptCommunicatorHelper;
@@ -325,8 +326,11 @@ namespace GraffitiArtist
             {
                 Vector2 size = graf.TextureWidth > graf.TextureHeight ? GraffitiMethods.ResizedWidthHeightBasedOnNewWidth(graf.TextureWidth, graf.TextureHeight, 200f)
                     : GraffitiMethods.ResizedWidthHeightBasedOnNewHeight(graf.TextureWidth, graf.TextureHeight, 200f);
-                
-                UISprite sprite = new UISprite(graf.TextureDictionary, graf.TextureName, new Size((int)size.X, (int)size.Y), new Point((UI.WIDTH / 2) - ((int)size.X / 2), (UI.HEIGHT / 2) - ((int)size.Y) / 2));
+
+                GTA.UI.Sprite sprite = new GTA.UI.Sprite(graf.TextureDictionary, graf.TextureName,
+                    new Size((int) size.X, (int) size.Y),
+                    new Point(((int) GTA.UI.Screen.Width / 2) - ((int) size.X / 2),
+                        ((int) GTA.UI.Screen.Height / 2) - ((int) size.Y) / 2));
                 sprite.Enabled = true;
                 sprite.Draw();
             }
@@ -363,20 +367,22 @@ namespace GraffitiArtist
                     while (inDeletionMode)
                     {
                         WorldGraffitiController();
-                        UI.ShowHudComponentThisFrame(HudComponent.Reticle);
+                        GTA.UI.Hud.ShowComponentThisFrame(HudComponent.Reticle);
 
                         if (Input.AcceptPressed())
                         {
                             Wait(100);
-                            
-                            RaycastResult ray = World.Raycast(GameplayCamera.Position, GameplayCamera.Position + GameplayCamera.Direction * 2000, IntersectOptions.Map | IntersectOptions.Objects, Game.Player.Character);
 
-                            if (!ray.DitHitAnything) return;
+                            RaycastResult ray = World.Raycast(GameplayCamera.Position,
+                                GameplayCamera.Position + GameplayCamera.Direction * 2000,
+                                IntersectFlags.Map | IntersectFlags.Objects, Game.Player.Character);
+
+                            if (!ray.DidHit) return;
 
                             float dist = float.MaxValue;
                             foreach (var graf in GraffitiMethods.AllGraffitiInMap)
                             {
-                                float currDist = World.GetDistance(graf.Location, ray.HitCoords);
+                                float currDist = World.GetDistance(graf.Location, ray.HitPosition);
                                 if (currDist <= 10f && currDist < dist)
                                 {
                                     chosenGraf = graf;
@@ -392,7 +398,7 @@ namespace GraffitiArtist
                             }
                             else
                             {
-                                UI.ShowSubtitle("You are not pointing at a graffiti. Try pointing at the center of the image for best results.");
+                                GTA.UI.Screen.ShowSubtitle("You are not pointing at a graffiti. Try pointing at the center of the image for best results.");
                             }
                         }
                         else if (Input.CancelPressed() || Game.Player.Character.IsDead)
@@ -405,10 +411,13 @@ namespace GraffitiArtist
 
                         while (confirmation)
                         {
-                            UIText info = new UIText("Texture: " + chosenGraf.Graffiti.TextureName
-                                + "\nDictionary: " + chosenGraf.Graffiti.TextureDictionary
-                                + "\nStreet: " + World.GetStreetName(chosenGraf.Location)
-                                , UI.WorldToScreen(chosenGraf.Location), 0.40f, Color.White, GTA.Font.ChaletComprimeCologne, true);
+                            TextElement info = new TextElement("Texture: " + chosenGraf.Graffiti.TextureName
+                                                                           + "\nDictionary: " +
+                                                                           chosenGraf.Graffiti.TextureDictionary
+                                                                           + "\nStreet: " +
+                                                                           World.GetStreetName(chosenGraf.Location)
+                                , GTA.UI.Screen.WorldToScreen(chosenGraf.Location), 0.40f, Color.White,
+                                GTA.UI.Font.ChaletComprimeCologne, Alignment.Center);
                             info.Enabled = true;
                             info.Draw();
 
@@ -474,7 +483,10 @@ namespace GraffitiArtist
             ItemHighlightEvent onHighlightHandler = null;
             onHighlightHandler = (s, selItem, selIndex) =>
             {
-                UIText info = new UIText(graffiti.Graffiti.TextureName + " | " + World.GetStreetName(graffiti.Location), UI.WorldToScreen(graffiti.Location), 0.40f, System.Drawing.Color.White, GTA.Font.ChaletComprimeCologne, true);
+                TextElement info = new TextElement(
+                    graffiti.Graffiti.TextureName + " | " + World.GetStreetName(graffiti.Location),
+                    GTA.UI.Screen.WorldToScreen(graffiti.Location), 0.40f, System.Drawing.Color.White,
+                    GTA.UI.Font.ChaletComprimeCologne, Alignment.Center);
                 info.Enabled = true;
                 info.Draw();
             };
@@ -503,7 +515,7 @@ namespace GraffitiArtist
                         grafMenu.OnItemSelect -= OnSelectHandler;
                         grafMenu.WhileItemHighlight -= onHighlightHandler;
 
-                        UI.ShowSubtitle("Deleted " + grafMenu.Title);
+                        GTA.UI.Screen.ShowSubtitle("Deleted " + grafMenu.Title);
                         _menuPool.CloseAllMenus();
 
                         // The index of the graf in AllGraffitiInMap should match its corresponding UIMenuItem in ExistingArtMenu.UIMenuItemList at the same index
@@ -571,21 +583,23 @@ namespace GraffitiArtist
             {
                 if (selItem == ItemRemoveOutfit)
                 {
-                    RaycastResult ray = World.Raycast(GameplayCamera.Position, GameplayCamera.Position + GameplayCamera.Direction * 50f, IntersectOptions.Map | IntersectOptions.Mission_Entities, Game.Player.Character);
+                    RaycastResult ray = World.Raycast(GameplayCamera.Position,
+                        GameplayCamera.Position + GameplayCamera.Direction * 50f,
+                        IntersectFlags.Map | IntersectFlags.MissionEntities, Game.Player.Character);
 
-                    if (ray.DitHitAnything)
+                    if (ray.DidHit)
                     {
                         Vehicle closeVeh = null;
-                        if (ray.DitHitEntity && ray.HitEntity.EntityIsAVehicle())
+                        if (ray.HitEntity != null && ray.HitEntity.EntityIsAVehicle())
                         {
                             closeVeh = (Vehicle)ray.HitEntity;
                         }
                         else
                         {
-                            closeVeh = World.GetClosestVehicle(ray.HitCoords, 10f);
+                            closeVeh = World.GetClosestVehicle(ray.HitPosition, 10f);
                         }
 
-                        if (closeVeh == null) { UI.ShowSubtitle("No vehicle detected. Point under vehicle for best results."); return; }
+                        if (closeVeh == null) { GTA.UI.Screen.ShowSubtitle("No vehicle detected. Point under vehicle for best results."); return; }
 
                         if (GraffitiMethods.LoadedVehicleOutfits.Any(lo => lo.CurrentVehicle == closeVeh)) // If there is already a loaded outfit applied to this vehicle, remove it first.
                         {
@@ -595,17 +609,17 @@ namespace GraffitiArtist
                                 outfit.RemoveFromVehicle();
                                 outfit.DecalList.Clear();
 
-                                UI.ShowSubtitle("Outfit ~y~" + outfit.OutfitName + " ~s~removed from vehicle");
+                                GTA.UI.Screen.ShowSubtitle("Outfit ~y~" + outfit.OutfitName + " ~s~removed from vehicle");
                             }
                         }
                         else
                         {
-                            UI.ShowSubtitle("Detected vehicle does not have an outfit.");
+                            GTA.UI.Screen.ShowSubtitle("Detected vehicle does not have an outfit.");
                         }
                     }
                     else
                     {
-                        UI.ShowSubtitle("No vehicle detected. Point under vehicle for best results.");
+                        GTA.UI.Screen.ShowSubtitle("No vehicle detected. Point under vehicle for best results.");
                     }
                 }
             };
@@ -855,14 +869,14 @@ namespace GraffitiArtist
 
                             if (!model.IsLoaded)
                             {
-                                UI.ShowSubtitle("Vehicle model is taking long to load.\nTry again.");
+                                GTA.UI.Screen.ShowSubtitle("Vehicle model is taking long to load.\nTry again.");
                                 break;
                             }
 
                             Vector3 gameCamDir = GameplayCamera.Direction;
                             gameCamDir.Z = 0f;
                             Vector3 spawnPoint = Game.Player.Character.Position + gameCamDir * 5f;
-                            Vehicle newVeh = World.CreateVehicle(model, Game.Player.Character.GetOffsetInWorldCoords(new Vector3(0f, 0f, 50f)));
+                            Vehicle newVeh = World.CreateVehicle(model, Game.Player.Character.GetOffsetPosition(new Vector3(0f, 0f, 50f)));
                             GTAFunction.Teleport(newVeh, spawnPoint, false);
                             newVeh.IsPersistent = false;
                             DecaledVehicleOutfit newLoadedOutfit = savedOutfit.Clone();
@@ -871,28 +885,30 @@ namespace GraffitiArtist
                         }
                         else
                         {
-                            UI.ShowSubtitle("Vehicle Model is not valid.");
+                            GTA.UI.Screen.ShowSubtitle("Vehicle Model is not valid.");
                         }
                         break;
                     }
                 }
                 else if (selItem == applyToVeh)
                 {
-                    RaycastResult ray = World.Raycast(GameplayCamera.Position, GameplayCamera.Position + GameplayCamera.Direction * 50f, IntersectOptions.Map | IntersectOptions.Mission_Entities, Game.Player.Character);
+                    RaycastResult ray = World.Raycast(GameplayCamera.Position,
+                        GameplayCamera.Position + GameplayCamera.Direction * 50f,
+                        IntersectFlags.Map | IntersectFlags.MissionEntities, Game.Player.Character);
 
-                    if (ray.DitHitAnything)
+                    if (ray.DidHit)
                     {
                         Vehicle closeVeh = null;
-                        if (ray.DitHitEntity && ray.HitEntity.EntityIsAVehicle())
+                        if (ray.HitEntity != null && ray.HitEntity.EntityIsAVehicle())
                         {
                             closeVeh = (Vehicle)ray.HitEntity;
                         }
                         else
                         {
-                            closeVeh = World.GetClosestVehicle(ray.HitCoords, 10f);
+                            closeVeh = World.GetClosestVehicle(ray.HitPosition, 10f);
                         }
 
-                        if (closeVeh == null) { UI.ShowSubtitle("No vehicle detected. Point under vehicle for best results."); return; }
+                        if (closeVeh == null) { GTA.UI.Screen.ShowSubtitle("No vehicle detected. Point under vehicle for best results."); return; }
 
                         if (closeVeh.Model.Hash == savedOutfit.VehicleModelHash)
                         {
@@ -910,21 +926,21 @@ namespace GraffitiArtist
                             newLoadedOutfit.ApplyToVehicle(closeVeh);
                             GraffitiMethods.LoadedVehicleOutfits.Add(newLoadedOutfit);
 
-                            UI.ShowSubtitle("Outfit Applied.");
+                            GTA.UI.Screen.ShowSubtitle("Outfit Applied.");
                         }
                         else
                         {
-                            UI.ShowSubtitle("Vehicle does not match this outfit's vehicle model.");
+                            GTA.UI.Screen.ShowSubtitle("Vehicle does not match this outfit's vehicle model.");
                         }
                     }
                     else
                     {
-                        UI.ShowSubtitle("No vehicle detected. Point under vehicle for best results.");
+                        GTA.UI.Screen.ShowSubtitle("No vehicle detected. Point under vehicle for best results.");
                     }
                 }
                 else if (selItem == changeName)
                 {
-                    string newOutfitName = Game.GetUserInput(999);
+                    string newOutfitName = Game.GetUserInput();
                     if (String.IsNullOrWhiteSpace(newOutfitName)) return;
 
                     while (true)
@@ -1030,7 +1046,7 @@ namespace GraffitiArtist
         {
             while (true)
             {
-                UI.ShowSubtitle("Deleted " + outfitMenu.Title);
+                GTA.UI.Screen.ShowSubtitle("Deleted " + outfitMenu.Title);
                 _menuPool.CloseAllMenus();
 
                 GraffitiMethods.AllVehicleGraffitiOutfits.Remove(savedOutfit);
@@ -1151,7 +1167,7 @@ namespace GraffitiArtist
             {
                 if (Game.Player.CanControlCharacter)
                 {
-                    UI.Notify("~r~Loaded \"Graffiti Mod\" by ~s~stillhere");
+                    GTA.UI.Notification.Show("~r~Loaded \"Graffiti Mod\" by ~s~stillhere");
                     welcomeMsgShown = true;
                     break;
                 }
@@ -1263,8 +1279,8 @@ namespace GraffitiArtist
                     else
                     {
                         GraffitiMethods.CurrentEditVehicle = GraffitiMethods.LastHitVehicle;
-                        Vector3 pos1 = GraffitiMethods.LastHitVehicle.GetOffsetFromWorldCoords(GraffitiMethods.LastHitLocation);
-                        Vector3 pos2 = GraffitiMethods.LastHitVehicle.GetOffsetFromWorldCoords(GraffitiMethods.LastHitLocation - GraffitiMethods.LastHitDirection * 0.1f);
+                        Vector3 pos1 = GraffitiMethods.LastHitVehicle.GetPositionOffset(GraffitiMethods.LastHitLocation);
+                        Vector3 pos2 = GraffitiMethods.LastHitVehicle.GetPositionOffset(GraffitiMethods.LastHitLocation - GraffitiMethods.LastHitDirection * 0.1f);
                         GraffitiMethods.CurrentEditOutfit.DecalList.Add(new SingleVehicleDecal(GraffitiMethods.LastHitVehicle, GraffitiMethods.LastSelectedGraffiti, pos1, pos2, GraffitiMethods.LastHitRotationAngle, GraffitiMethods.LastHitGrafSize.X, GraffitiMethods.LastHitGrafSize.Y));
                     }
 
@@ -1382,7 +1398,12 @@ namespace GraffitiArtist
                 {
                     GraffitiMethods.RemoveUnusedLoadedOutfits();
                     GraffitiMethods.FreeAnyUnusedDecalTypes();
-                    if (GraffitiMethods.SeeInfoMode) { UI.ShowSubtitle("Report: " + GraffitiMethods.UsableDecalTypes.Where(g => !g.Available).ToList().Count() + "/" + GraffitiMethods.UsableDecalTypes.Count + " decalTypes used in this area.", 10000); }
+                    if (GraffitiMethods.SeeInfoMode)
+                    {
+                        GTA.UI.Screen.ShowSubtitle(
+                            "Report: " + GraffitiMethods.UsableDecalTypes.Where(g => !g.Available).ToList().Count() +
+                            "/" + GraffitiMethods.UsableDecalTypes.Count + " decalTypes used in this area.", 10000);
+                    }
                     refreshAllTimer = DateTime.Now.AddMilliseconds(20000d);
                 }
             }
@@ -1653,11 +1674,11 @@ namespace GraffitiArtist
 
         public static void DisableControlsWhileTagging()
         {
-            Game.DisableAllControlsThisFrame(2);
+            Game.DisableAllControlsThisFrame();
             
             foreach (var con in ControlsToEnable)
             {
-                Game.EnableControlThisFrame(2, con);
+                Game.EnableControlThisFrame(con);
             }
 
             //DisableCameraControlsWhenAppropriate();
@@ -1668,20 +1689,20 @@ namespace GraffitiArtist
             if (!IsHoldingRotationModifier())
                 return;
 
-            Game.DisableControlThisFrame(2, GTA.Control.LookUpDown);
-            Game.DisableControlThisFrame(2, GTA.Control.LookLeftRight);
+            Game.DisableControlThisFrame(GTA.Control.LookUpDown);
+            Game.DisableControlThisFrame(GTA.Control.LookLeftRight);
         }
 
         public static void DisableAllButCamera(int index)
         {
-            Game.DisableAllControlsThisFrame(index);
-            Game.EnableControlThisFrame(index, GTA.Control.LookUpDown);
-            Game.EnableControlThisFrame(index, GTA.Control.LookLeftRight);
+            Game.DisableAllControlsThisFrame();
+            Game.EnableControlThisFrame(GTA.Control.LookUpDown);
+            Game.EnableControlThisFrame(GTA.Control.LookLeftRight);
         }
 
         public static bool IsKeyboard()
         {
-            return Game.CurrentInputMode == InputMode.MouseAndKeyboard;
+            return Game.LastInputMethod == InputMethod.MouseAndKeyboard;
         }
 
         public static DateTime Timer = DateTime.Now;
@@ -1698,17 +1719,17 @@ namespace GraffitiArtist
 
         public static bool IsHoldingRotationModifier()
         {
-            return !IsKeyboard() && Game.IsControlPressed(2, GTA.Control.PhoneDown);
+            return !IsKeyboard() && Game.IsControlPressed(GTA.Control.PhoneDown);
         }
 
         public static bool IsHoldingSpeedup()
         {
-            return Game.IsKeyPressed(Keys.ShiftKey) || Game.IsControlPressed(1, GTA.Control.Aim);
+            return Game.IsKeyPressed(Keys.ShiftKey) || Game.IsControlPressed(GTA.Control.Aim);
         }
 
         public static bool IsHoldingSuperSpeedup()
         {
-            return Game.IsKeyPressed(Keys.Space) || Game.IsControlPressed(1, GTA.Control.Attack);
+            return Game.IsKeyPressed(Keys.Space) || Game.IsControlPressed(GTA.Control.Attack);
         }
 
         public static void SetChangeUnits(float normal, float fast, float superfast)
@@ -1741,7 +1762,7 @@ namespace GraffitiArtist
                 }
                 else
                 {
-                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(2, GTA.Control.PhoneRight))
+                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(GTA.Control.PhoneRight))
                     {
                         SetInputWait(100);
                         return true;
@@ -1765,7 +1786,7 @@ namespace GraffitiArtist
                 }
                 else
                 {
-                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(2, GTA.Control.PhoneLeft))
+                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(GTA.Control.PhoneLeft))
                     {
                         SetInputWait(100);
                         return true;
@@ -1789,7 +1810,7 @@ namespace GraffitiArtist
                 }
                 else
                 {
-                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(2, GTA.Control.PhoneUp))
+                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(GTA.Control.PhoneUp))
                     {
                         SetInputWait(100);
                         return true;
@@ -1813,7 +1834,7 @@ namespace GraffitiArtist
                 }
                 else
                 {
-                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(2, GTA.Control.PhoneDown))
+                    if (/*IsHoldingRotationModifier() && */Game.IsControlPressed(GTA.Control.PhoneDown))
                     {
                         SetInputWait(100);
                         return true;
@@ -1829,7 +1850,8 @@ namespace GraffitiArtist
             {
                 if (IsKeyboard())
                 {
-                    if (Game.IsKeyPressed(Keys.Back) || Game.IsKeyPressed(Keys.Escape) || Game.IsControlPressed(0, GTA.Control.CursorCancel))
+                    if (Game.IsKeyPressed(Keys.Back) || Game.IsKeyPressed(Keys.Escape) ||
+                        Game.IsControlPressed(GTA.Control.CursorCancel))
                     {
                         SetInputWait(100);
                         return true;
@@ -1837,7 +1859,7 @@ namespace GraffitiArtist
                 }
                 else
                 {
-                    if (Game.IsControlPressed(2, GTA.Control.PhoneCancel))
+                    if (Game.IsControlPressed(GTA.Control.PhoneCancel))
                     {
                         SetInputWait(100);
                         return true;
@@ -1851,7 +1873,7 @@ namespace GraffitiArtist
         {
             if (CanAcceptInput())
             {
-                if (Game.IsControlPressed(2, GTA.Control.PhoneSelect))
+                if (Game.IsControlPressed(GTA.Control.PhoneSelect))
                 {
                     SetInputWait(100);
                     return true;
